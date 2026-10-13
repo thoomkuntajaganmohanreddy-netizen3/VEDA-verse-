@@ -1,0 +1,130 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with gamification stats, streak, XP, and rank level.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase user ID matching auth.uid"
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "User display name"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "User email address"
+        },
+        "xp": {
+          "type": "integer",
+          "description": "Total experience points earned"
+        },
+        "streakDays": {
+          "type": "integer",
+          "description": "Current active daily streak"
+        },
+        "lastActiveDate": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "ISO date of last app activity"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["Shishya", "Sadhaka", "Vidwan", "Rishi"],
+          "description": "Vedic learning stage rank"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["uid", "displayName", "email", "xp", "streakDays", "level"]
+    },
+    "Bookmark": {
+      "title": "Bookmark",
+      "description": "User saved bookmarks for mantras, scriptures, temples, or botanical remedies.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID"
+        },
+        "itemType": {
+          "type": "string",
+          "enum": ["mantra", "scripture", "temple", "story", "botanical"],
+          "description": "Type of saved item"
+        },
+        "itemId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Unique identifier of item"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Title of item"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when bookmarked"
+        }
+      },
+      "required": ["userId", "itemType", "itemId", "title"]
+    },
+    "QuizAttempt": {
+      "title": "QuizAttempt",
+      "description": "Record of a completed quiz session by a user.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID"
+        },
+        "quizId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "ID of completed quiz"
+        },
+        "score": {
+          "type": "integer",
+          "description": "Number of correct answers"
+        },
+        "total": {
+          "type": "integer",
+          "description": "Total questions in quiz"
+        },
+        "xpEarned": {
+          "type": "integer",
+          "description": "XP gained from completion"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "Timestamp of completion"
+        }
+      },
+      "required": ["userId", "quizId", "score", "total", "xpEarned"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document indexed by user auth UID"
+    },
+    "/users/{userId}/bookmarks/{bookmarkId}": {
+      "schema": "Bookmark",
+      "description": "Subcollection of saved bookmarks for a specific user"
+    },
+    "/users/{userId}/quiz_attempts/{attemptId}": {
+      "schema": "QuizAttempt",
+      "description": "Subcollection of completed quizzes for a specific user"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "VEDA VERSE",
+  "description": "Discover, chant, and master Vedic mantras, ancient scriptures, sacred architecture, and Ayurvedic bioscience with Gen Z-focused AI guidance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

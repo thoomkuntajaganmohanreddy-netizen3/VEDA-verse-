@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User Profile
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 100
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 150
+        && request.resource.data.xp is int
+        && request.resource.data.xp >= 0
+        && request.resource.data.streakDays is int
+        && request.resource.data.streakDays >= 0
+        && request.resource.data.level in ['Shishya', 'Sadhaka', 'Vidwan', 'Rishi'];
+
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.xp is int
+        && request.resource.data.xp >= resource.data.xp
+        && request.resource.data.streakDays is int
+        && request.resource.data.streakDays >= 0
+        && request.resource.data.level in ['Shishya', 'Sadhaka', 'Vidwan', 'Rishi'];
+
+      allow delete: if false;
+
+      // Bookmarks Subcollection
+      match /bookmarks/{bookmarkId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && isValidId(bookmarkId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.itemType in ['mantra', 'scripture', 'temple', 'story', 'botanical']
+          && request.resource.data.itemId is string
+          && request.resource.data.itemId.size() <= 128
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 200;
+        allow update: if false;
+        allow delete: if isOwner(userId);
+      }
+
+      // Quiz Attempts Subcollection
+      match /quiz_attempts/{attemptId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && isValidId(attemptId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.quizId is string
+          && request.resource.data.quizId.size() <= 128
+          && request.resource.data.score is int
+          && request.resource.data.total is int
+          && request.resource.data.xpEarned is int
+          && request.resource.data.xpEarned >= 0;
+        allow update: if false;
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
